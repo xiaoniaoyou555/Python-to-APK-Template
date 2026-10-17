@@ -69,8 +69,8 @@ jobs:
         #buildozer -v android update 2>&1 | tee update.log
         buildozer -v android debug 2>&1 | tee buildozer.log
         
-        #查找所有APK文件并复制到根目录 find all APK files and copy them to root directory
-        find . -name "*.apk" -exec cp {} ./ \; 2>/dev/null || true
+        #查找所有APK文件并复制到根目录，用更稳定的写法
+        find . -type f -name "*.apk" -print0 | xargs -0 -I {} cp {} ./
 
     - name: Check if APK was built
       id: check-build
