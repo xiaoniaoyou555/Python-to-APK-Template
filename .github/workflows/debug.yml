@@ -75,6 +75,8 @@ jobs:
     - name: Check if APK was built
       id: check-build
       run: |
+        echo "==== List all files in workspace ===="
+        ls -la
         if ls *.apk 1> /dev/null 2>&1; then
           echo "BUILD_FINAL_SUCCESS=true" >> $GITHUB_OUTPUT
           echo "Found APK files:"
@@ -89,7 +91,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: kivy-app-apk
-        path: ./*.apk
+        path: |
+          *.apk
+        if-no-files-found: error
         retention-days: 30
 
     - name: Upload build logs
