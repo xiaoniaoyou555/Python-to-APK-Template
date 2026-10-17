@@ -32,7 +32,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.9'#3.9以上cython无long The version above 3.9 of cython has no long integer
+        python-version: '3.9'
 
     - name: Install system dependencies
       run: |
@@ -44,34 +44,47 @@ jobs:
             libncursesw5-dev cmake libffi-dev libssl-dev \
             curl unzip openjdk-17-jdk libltdl-dev
 
-    - name: Install Buildozer and dependencies
+    - name: Install Buildozer and python-for-android
       run: |
         python -m pip install --upgrade pip
-        #下载依赖库 add your requirements
         pip install buildozer cython==0.29.33 kivy
-        #何意味 You will need it
         pip install python-for-android
+
+    - name: Patch p4a to fix pip self-upgrade crash
+      run: |
+        # 获取 p4a 安装路径
+        P4A_DIR=$(python -c "import pythonforandroid, os; print(os.path.dirname(pythonforandroid.__file__))")
+        echo "p4a installed at: $P4A_DIR"
+        
+        # 把 p4a 里的 "pip install -U pip" 替换成空操作，避免 pip 自升级把自己搞坏
+        if [ -f "$P4A_DIR/build.py" ]; then
+          sed -i 's/pip install -U pip/pip install --upgrade "pip<25" || true/g' "$P4A_DIR/build.py"
+          echo "Patched build.py successfully"
+        else
+          echo "WARNING: build.py not found at $P4A_DIR"
+        fi
+        
+        # 把 p4a 路径写入 buildozer.spec，让 buildozer 使用系统安装的 p4a 而不是自己下载
+        echo "" >> buildozer.spec
+        echo "p4a.source_dir = $P4A_DIR" >> buildozer.spec
+        echo "Added p4a.source_dir to buildozer.spec"
+        tail -5 buildozer.spec
 
     - name: Build APK with Buildozer
       run: |
+        set -e
         export PATH="$HOME/.local/bin:$PATH"
-        echo "Let's have a check:"
         java -version
         python --version
         buildozer --version
         
-        #设置环境变量解决网络问题 set environment variables to solve network problems
         export BUILDOZER_ALLOW_PLATFORM_EXEC=1
         export USE_COLORS=0
         
-        #开始构筑 start building
-        #buildozer -v android clean 2>&1 | tee clean.log
-        #buildozer -v android update 2>&1 | tee update.log
         buildozer -v android debug 2>&1 | tee buildozer.log
         
-        # 打包完成后，打印APK所在目录，方便调试
-        echo "==== Search for APK locations ===="
-        find . -name "*.apk"
+        echo "===== Searching for apk files ====="
+        find . -type f -name "*.apk"
 
     - name: Check if APK exists
       id: check-build
@@ -84,6 +97,7 @@ jobs:
         else
           echo "BUILD_FINAL_SUCCESS=false" >> $GITHUB_OUTPUT
           echo "No APK found."
+          exit 1
         fi
 
     - name: Upload APK artifact
@@ -92,7 +106,9 @@ jobs:
       with:
         name: kivy-app-apk
         path: |
-          .buildozer/android/platform/build/dists/**/build/outputs/apk/debug/*.apk
+          .buildozer/android/platform/build/dists/**/*.apk
+          bin/*.apk
+          *.apk
         if-no-files-found: error
         retention-days: 30
 
@@ -103,6 +119,4 @@ jobs:
         name: build-logs
         path: |
           buildozer.log
-          #clean.log
-          #update.log
         retention-days: 7
