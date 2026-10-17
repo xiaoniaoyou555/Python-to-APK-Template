@@ -1,10 +1,10 @@
 [app]
 #标题允许中文标题语言不限
-标题=记账
-package.name = packagename
+title=记账
+package.name = bookkeeping
 
 #发布模式不能用 org.test'org.test
-domain=org.簿记
+domain=org.bookkeeping
 #工作目录工作目录
 source.dir = .
 #需要打包的文件类型文件类型要打包
