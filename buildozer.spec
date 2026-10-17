@@ -3,17 +3,17 @@
 标题=记账
 package.name = packagename
 
-#release模式不能用 org.test'org.test'不能在发布模式下使用
+#发布模式不能用 org.test'org.test
 domain=org.簿记
 #工作目录工作目录
 source.dir = .
 #需要打包的文件类型文件类型要打包
 source.include_exts = py,png,jpg,kv,atlas
-#打包 image limage limage limage liveyodo youse Pack文件在图像目录中
+#打包 image limage liveyodo youse Pack youp you you you you you big you big
 #source.include_patterns = image/*
 version = 0.0.1
 #依赖库，你需要最后两个是包装
-requirements = python3,kivy,kivymd,libiconv,libffi
+requirements = python3,kivy,libiconv,libffi
 #icon.filename = icon.png
 #presplash.filename = presplash.png
 #fullscreen = 0
