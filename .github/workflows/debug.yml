@@ -69,21 +69,21 @@ jobs:
         #buildozer -v android update 2>&1 | tee update.log
         buildozer -v android debug 2>&1 | tee buildozer.log
         
-        #查找所有APK文件并复制到根目录，用更稳定的写法
-        find . -type f -name "*.apk" -print0 | xargs -0 -I {} cp {} ./
+        # 打包完成后，打印APK所在目录，方便调试
+        echo "==== Search for APK locations ===="
+        find . -name "*.apk"
 
-    - name: Check if APK was built
+    - name: Check if APK exists
       id: check-build
       run: |
-        echo "==== List all files in workspace ===="
-        ls -la
-        if ls *.apk 1> /dev/null 2>&1; then
+        APK_FILES=$(find . -name "*.apk")
+        if [ -n "$APK_FILES" ]; then
           echo "BUILD_FINAL_SUCCESS=true" >> $GITHUB_OUTPUT
-          echo "Found APK files:"
-          ls -la *.apk
+          echo "Found APK:"
+          echo "$APK_FILES"
         else
           echo "BUILD_FINAL_SUCCESS=false" >> $GITHUB_OUTPUT
-          echo "Didn't found APK files."
+          echo "No APK found."
         fi
 
     - name: Upload APK artifact
@@ -92,7 +92,7 @@ jobs:
       with:
         name: kivy-app-apk
         path: |
-          *.apk
+          .buildozer/android/platform/build/dists/**/build/outputs/apk/debug/*.apk
         if-no-files-found: error
         retention-days: 30
 
