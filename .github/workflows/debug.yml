@@ -61,7 +61,7 @@ jobs:
         buildozer --version
         
         #设置环境变量解决网络问题 set environment variables to solve network problems
-        export BUILDODER_ALLOW_PLATFORM_EXEC=1
+        export BUILDOZER_ALLOW_PLATFORM_EXEC=1
         export USE_COLORS=0
         
         #开始构筑 start building
@@ -69,7 +69,7 @@ jobs:
         #buildozer -v android update 2>&1 | tee update.log
         buildozer -v android debug 2>&1 | tee buildozer.log
         
-        #查找所有APK文件并复制到bin目录 find all APK files and copy them to the bin directory
+        #查找所有APK文件并复制到根目录 find all APK files and copy them to root directory
         find . -name "*.apk" -exec cp {} ./ \; 2>/dev/null || true
 
     - name: Check if APK was built
@@ -89,7 +89,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: kivy-app-apk
-        path: bin/*.apk
+        path: ./*.apk
         retention-days: 30
 
     - name: Upload build logs
